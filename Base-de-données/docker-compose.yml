@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: pg-cda
+    environment:
+      POSTGRES_PASSWORD: formation
+    ports:
+      - "5432:5432"
+    shm_size: 256mb            # indispensable : mémoire partagée pour les requêtes parallèles
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./:/donnees            # votre dossier de travail, visible dans le conteneur
+volumes:
+  pgdata:
