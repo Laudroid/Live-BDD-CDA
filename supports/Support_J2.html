@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jour 2 — Administration de la base de données</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#e9edee}
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;overflow:hidden;background:#fff;color:#16201f;
+ font-family:'Inter',system-ui,sans-serif;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+.slide{position:absolute;inset:0;display:none}.slide.active{display:block}
+.inner{position:absolute;left:96px;right:96px;top:70px;bottom:92px}
+.kicker{font:600 15px/1 'Inter';letter-spacing:.14em;text-transform:uppercase;color:#1f6a72;margin-bottom:18px}
+h1{font-family:'Source Serif 4',Georgia,serif;font-weight:650;margin:0;letter-spacing:-.01em}
+h2{font-family:'Source Serif 4',Georgia,serif;font-weight:650;font-size:44px;line-height:1.1;margin:0 0 30px;letter-spacing:-.01em;color:#10292b}
+.titre .bande{position:absolute;left:0;top:0;bottom:0;width:22px;background:#1f6a72}
+.titre .inner{top:150px}.titre h1{font-size:68px;line-height:1.05;color:#10292b;max-width:1000px}
+.titre .sous{font-size:26px;color:#4b5b5c;margin:26px 0 0;max-width:900px;line-height:1.35}
+.titre .meta{position:absolute;bottom:0;font-size:17px;color:#6c7a7b;line-height:1.6}
+.section{background:#10292b;color:#fff}.section .inner{top:200px}
+.section .num{font:600 18px 'JetBrains Mono';color:#7fc4c9;margin-bottom:22px;letter-spacing:.1em}
+.section h1{font-size:64px;line-height:1.08;color:#fff;max-width:1000px}.section .sous{font-size:24px;color:#b9d3d5;margin-top:24px;max-width:900px;line-height:1.4}
+.puces{margin:0;padding:0;list-style:none}.puces li{position:relative;padding-left:30px;font-size:25px;line-height:1.38;margin-bottom:16px;color:#22302f}
+.puces li:before{content:'';position:absolute;left:0;top:13px;width:12px;height:3px;background:#1f6a72}
+.puces.petit li{font-size:20px;margin-bottom:10px}.puces.petit li:before{top:11px}
+b,strong{color:#10292b;font-weight:650}
+code{font-variant-ligatures:none;font-family:'JetBrains Mono',monospace;font-size:.86em;background:#eef3f3;padding:1px 6px;border-radius:4px;color:#10474d}
+pre{font-variant-ligatures:none;margin:0;background:#0f2224;color:#e3eeee;border-radius:10px;padding:20px 24px;font:15px/1.5 'JetBrains Mono',monospace;white-space:pre-wrap;overflow:hidden}
+pre code{background:none;color:inherit;padding:0;font-size:inherit}
+table{width:100%;border-collapse:collapse;font-size:19px;line-height:1.3}
+th{text-align:left;font-weight:600;color:#1f6a72;font-size:14px;letter-spacing:.08em;text-transform:uppercase;padding:0 14px 10px;border-bottom:2px solid #1f6a72}
+td{padding:11px 14px;border-bottom:1px solid #dfe7e7;vertical-align:top;color:#22302f}
+table.serre{font-size:17px}table.serre td{padding:8px 12px}
+.intro{font-size:22px;color:#3d4c4d;margin:0 0 18px;line-height:1.4}.note{font-size:17px;color:#5d6c6d;margin:18px 0 0;line-height:1.45}
+.deux{display:grid;grid-template-columns:1fr 1fr;gap:36px}.etiquette{font:600 14px 'Inter';letter-spacing:.1em;text-transform:uppercase;color:#1f6a72;margin-bottom:12px}
+.deux pre{font-size:14px}
+.chiffres{display:flex;gap:28px;margin-top:10px}.chiffre{flex:1;border-top:4px solid #1f6a72;padding-top:18px}
+.chiffre .val{font-family:'Source Serif 4',Georgia,serif;font-size:60px;font-weight:650;color:#10292b;line-height:1}
+.chiffre .lib{font-size:19px;color:#3d4c4d;margin-top:12px;line-height:1.35}
+.encadre{border-left:6px solid #1f6a72;background:#f1f6f6;padding:26px 32px;font-size:27px;line-height:1.42;color:#10292b}
+#pied{position:absolute;left:96px;right:150px;bottom:34px;display:flex;align-items:center;gap:22px;font-size:14px;color:#7a8889;z-index:5}
+#pied .nom{flex:0 0 auto;letter-spacing:.04em}#dots{flex:1;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+#dots span{width:7px;height:7px;border-radius:50%;background:#cfdcdc;cursor:pointer}#dots span.on{background:#1f6a72}
+#compteur{font-family:'JetBrains Mono';flex:0 0 auto}
+.nav{position:absolute;bottom:26px;width:34px;height:34px;border:1px solid #cfdcdc;border-radius:50%;background:#fff;color:#1f6a72;
+ font-size:18px;line-height:30px;text-align:center;cursor:pointer;z-index:6;user-select:none}#prec{right:56px}#suiv{right:14px}
+.sombre #pied{color:#9fbcbe}.sombre #dots span{background:#3c5a5d}.sombre #dots span.on{background:#7fc4c9}
+</style></head><body><div id="stage"><div class='slide titre'><div class='bande'></div><div class='inner'>
+<div class='kicker'>Jour 2 sur 3</div><h1>Administration de la base de données</h1><p class='sous'>Transactions, procédures stockées, triggers et gestion des utilisateurs</p>
+<p class='meta'>Bases de données : optimisation, administration, Big Data et RGPD<br>Concepteurs Développeurs d'Applications · PostgreSQL 16</p></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Objectifs</div><h2>À la fin de la journée, vous saurez…</h2><div class='corps'><ul class='puces'><li>utiliser <code>BEGIN</code>, <code>COMMIT</code>, <code>ROLLBACK</code>, <code>SAVEPOINT</code></li><li>choisir un niveau d'isolation et poser un verrou explicite</li><li>écrire fonctions et procédures en <b>PL/pgSQL</b></li><li>écrire un <b>trigger</b> de règle métier ou d'audit</li><li>attribuer des droits selon le <b>moindre privilège</b></li></ul></div></div></div><div class='slide section'><div class='inner'><div class='num'>PARTIE 1</div>
+<h1>Transactions</h1><p class='sous'>Tout ou rien, même à plusieurs</p></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>ACID</div><h2>Quatre garanties</h2><div class='corps'><table class=''><thead><tr><th>Propriété</th><th>Garantie</th><th>Dans l'intranet RH</th></tr></thead><tbody><tr><td>Atomicité</td><td>tout ou rien</td><td>clore l'ancien salaire et créer le nouveau</td></tr><tr><td>Cohérence</td><td>d'un état valide à un état valide</td><td>jamais deux salaires en cours</td></tr><tr><td>Isolation</td><td>pas d'interférence</td><td>deux gestionnaires, un même salarié</td></tr><tr><td>Durabilité</td><td>survit à une panne</td><td>journal WAL écrit avant la réponse</td></tr></tbody></table></div></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Démonstration</div><h2>Autocommit contre transaction</h2><div class='corps'><div class='deux'><div class='col'><div class='etiquette'>Sans transaction</div><pre><code>UPDATE demo_salaires SET to_date=&#x27;2026-11-02&#x27;
+WHERE emp_no=10001
+  AND to_date=&#x27;9999-01-01&#x27;;  -- validé
+INSERT INTO demo_salaires
+VALUES (10001, NULL, ...);   -- ERREUR
+
+-- salaires en cours : 0</code></pre></div><div class='col'><div class='etiquette'>Dans une transaction</div><pre><code>BEGIN;
+UPDATE demo_salaires SET to_date=&#x27;2026-11-02&#x27;
+WHERE emp_no=10002
+  AND to_date=&#x27;9999-01-01&#x27;;
+INSERT INTO demo_salaires
+VALUES (10002, NULL, ...);   -- ERREUR
+ROLLBACK;
+-- salaires en cours : 1</code></pre></div></div><p class='note'>Après une erreur, PostgreSQL refuse toute instruction jusqu'au ROLLBACK. SAVEPOINT permet d'annuler une partie seulement.</p></div></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Concurrence</div><h2>Anomalies et niveaux d'isolation</h2><div class='corps'><table class='serre'><thead><tr><th>Niveau</th><th>Comportement dans PostgreSQL</th></tr></thead><tbody><tr><td>READ UNCOMMITTED</td><td>accepté, se comporte comme READ COMMITTED : aucune lecture sale</td></tr><tr><td>READ COMMITTED (défaut)</td><td>chaque <b>instruction</b> voit les données validées à son démarrage</td></tr><tr><td>REPEATABLE READ</td><td>toute la <b>transaction</b> voit une image figée ; conflit d'écriture : erreur 40001</td></tr><tr><td>SERIALIZABLE</td><td>équivalent à une exécution en série ; rejet possible (40001), à rejouer</td></tr></tbody></table></div></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Verrous</div><h2>Annoncer ce que l'on va modifier</h2><div class='corps'><ul class='puces'><li>Toute modification verrouille la ligne jusqu'à la fin de la transaction</li><li><code>SELECT … FOR UPDATE</code> pose ce verrou dès la lecture</li><li><b>Interblocage</b> : détecté après <code>deadlock_timeout</code> (1 s), une transaction est annulée (40P01)</li><li>Prévention : verrouiller toujours dans le même ordre</li></ul></div></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Démonstration à deux sessions</div><h2>Une augmentation écrite sans précaution</h2><div class='corps'><table class=''><thead><tr><th>Ligne obtenue</th><th>from_date</th><th>to_date</th></tr></thead><tbody><tr><td>ancien salaire 74 057</td><td>2001-11-27</td><td>2026-11-03 (clôture de A écrasée)</td></tr><tr><td>salaire de A, 76 000</td><td>2026-11-02</td><td>9999-01-01</td></tr><tr><td>salaire de B, 78 000</td><td>2026-11-03</td><td>9999-01-01</td></tr></tbody></table></div></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Constat</div><h2>Deux salaires en cours</h2><div class='corps'><div class='encadre'>La base a obéi à chaque instruction : c'est la <b>conception de l'opération</b> qui est fautive.</div><p class='note'>Au TP2, vous chercherez deux protections : l'une déclarative, l'autre dans l'opération.</p></div></div></div><div class='slide section'><div class='inner'><div class='num'>PARTIE 2</div>
+<h1>Procédures stockées</h1><p class='sous'>PL/pgSQL : de la logique dans la base</p></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Fonction ou procédure</div><h2>Deux objets, deux usages</h2><div class='corps'><table class=''><thead><tr><th></th><th>Fonction</th><th>Procédure</th></tr></thead><tbody><tr><td>Création</td><td><code>CREATE FUNCTION</code></td><td><code>CREATE PROCEDURE</code></td></tr><tr><td>Appel</td><td><code>SELECT f(…)</code></td><td><code>CALL p(…)</code></td></tr><tr><td>Valeur renvoyée</td><td>oui</td><td>non</td></tr><tr><td>COMMIT / ROLLBACK</td><td>jamais</td><td>possible hors transaction explicite et hors SECURITY DEFINER</td></tr></tbody></table></div></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Structure d&#x27;un bloc</div><h2>Une fonction PL/pgSQL</h2><div class='corps'><pre><code>CREATE OR REPLACE FUNCTION f_anciennete(p_emp_no integer, p_date date DEFAULT date &#x27;2002-08-01&#x27;)
+RETURNS integer LANGUAGE plpgsql STABLE AS $$
+DECLARE
+    v_embauche date;
+BEGIN
+    SELECT hire_date INTO v_embauche FROM employees WHERE emp_no = p_emp_no;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION &#x27;Salarié % inconnu&#x27;, p_emp_no;
+    END IF;
+    RETURN extract(year FROM age(p_date, v_embauche))::int;
+END $$;
+
+SELECT f_anciennete(10001);   -- 16</code></pre></div></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Contrôles et erreurs</div><h2>Une procédure qui refuse les mauvaises saisies</h2><div class='corps'><pre><code>CREATE OR REPLACE PROCEDURE p_renommer_departement(p_dept_no char(4), p_nom varchar)
+LANGUAGE plpgsql AS $$
+BEGIN
+    IF length(trim(p_nom)) &lt; 3 THEN
+        RAISE EXCEPTION &#x27;Nom trop court : &quot;%&quot;&#x27;, p_nom USING ERRCODE = &#x27;invalid_parameter_value&#x27;;
+    END IF;
+    UPDATE departments SET dept_name = p_nom WHERE dept_no = p_dept_no;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION &#x27;Département % inconnu&#x27;, p_dept_no USING ERRCODE = &#x27;no_data_found&#x27;;
+    END IF;
+END $$;</code></pre><p class='note'>Un ERRCODE explicite permet à l'application de réagir de façon appropriée.</p></div></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Sécurité</div><h2>SECURITY DEFINER : deux précautions obligatoires</h2><div class='corps'><ul class='puces'><li>La fonction s'exécute avec les droits de son <b>propriétaire</b></li><li>Elle donne accès à une opération précise sans donner accès aux tables</li><li>1. Fixer <code>SET search_path = public, pg_temp</code></li><li>2. <code>REVOKE EXECUTE … FROM PUBLIC</code> : par défaut, tout le monde peut exécuter</li></ul></div></div></div><div class='slide section'><div class='inner'><div class='num'>PARTIE 3</div>
+<h1>Triggers</h1><p class='sous'>Réagir automatiquement aux écritures</p></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Vocabulaire</div><h2>Quand et combien de fois ?</h2><div class='corps'><table class=''><thead><tr><th>Terme</th><th>Signification</th></tr></thead><tbody><tr><td>BEFORE</td><td>avant l'écriture : peut modifier NEW ou annuler (RETURN NULL)</td></tr><tr><td>AFTER</td><td>après l'écriture : journaliser, propager ; valeur renvoyée ignorée</td></tr><tr><td>FOR EACH ROW / STATEMENT</td><td>une fois par ligne / une fois par instruction</td></tr><tr><td>NEW, OLD, TG_OP</td><td>ligne après, ligne avant, opération</td></tr></tbody></table></div></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Exemples</div><h2>Normaliser, puis historiser</h2><div class='corps'><div class='deux'><div class='col'><div class='etiquette'>BEFORE INSERT OR UPDATE</div><pre><code>CREATE FUNCTION f_normaliser_nom_dept()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  NEW.dept_name := initcap(trim(NEW.dept_name));
+  RETURN NEW;
+END $$;</code></pre></div><div class='col'><div class='etiquette'>AFTER UPDATE</div><pre><code>CREATE FUNCTION f_historiser_dept()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.dept_name IS DISTINCT FROM OLD.dept_name THEN
+    INSERT INTO historique_departements
+      (dept_no, ancien_nom, nouveau_nom)
+    VALUES (OLD.dept_no, OLD.dept_name, NEW.dept_name);
+  END IF;
+  RETURN NULL;
+END $$;</code></pre></div></div><p class='note'>Résultat : « service client » devient « Service Client », et l'historique note « Customer Service → Service Client » avec l'auteur.</p></div></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Bonnes pratiques</div><h2>Contrainte d'abord, trigger ensuite</h2><div class='corps'><ul class='puces'><li>CHECK, UNIQUE, clé étrangère, exclusion : plus simples, plus rapides, impossibles à oublier</li><li>Trigger : règles qui consultent d'autres lignes, et audit</li><li>FOR EACH ROW sur des millions de lignes : un coût visible</li><li><code>session_user</code> = la personne connectée ; <code>current_user</code> change dans SECURITY DEFINER</li></ul></div></div></div><div class='slide section'><div class='inner'><div class='num'>PARTIE 4</div>
+<h1>Utilisateurs et droits</h1><p class='sous'>Le moindre privilège</p></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Rôles</div><h2>Un groupe, un compte, un droit</h2><div class='corps'><pre><code>CREATE ROLE communication NOLOGIN;                     -- un groupe
+GRANT USAGE ON SCHEMA public TO communication;
+GRANT SELECT ON departments TO communication;
+CREATE ROLE dora LOGIN PASSWORD &#x27;dora-demo&#x27; IN ROLE communication;
+
+SET ROLE dora;
+SELECT count(*) FROM departments;   -- 9
+SELECT count(*) FROM employees;     -- ERROR: permission denied for table employees
+RESET ROLE;</code></pre><p class='note'>Droits par colonne : <code>GRANT SELECT (col1, col2) ON t TO r</code>. Sous-ensemble : une vue.</p></div></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>Droits par défaut</div><h2>Trois points à connaître</h2><div class='corps'><ul class='puces'><li>Depuis PostgreSQL 15, PUBLIC ne crée plus d'objets dans le schéma <code>public</code></li><li>PUBLIC n'a aucun droit sur les tables, mais <b>exécute toutes les fonctions</b> par défaut</li><li>Vue : les <b>tables</b> sont lues avec les droits du propriétaire ; les <b>fonctions</b> avec ceux de l'appelant</li><li>Aperçu : <b>Row-Level Security</b> filtre les lignes selon l'utilisateur</li></ul></div></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>TP2 · 2 h 30</div><h2>Transactions, procédures, triggers, droits</h2><div class='corps'><div class='encadre'>Neuf règles de gestion à garantir <b>par la base</b> : contraintes, anomalie de concurrence, quatre opérations RH, audit, quatre rôles.</div><p class='note'>Recette en 14 cas. Livrables : tp2.sql, recette, réponses, USAGE-IA.md.</p></div></div></div><div class='slide contenu'><div class='inner'><div class='kicker'>À retenir</div><h2>Jour 2 en cinq idées</h2><div class='corps'><ul class='puces'><li>Une opération métier à plusieurs écritures = une transaction</li><li>READ COMMITTED ne protège pas « lire puis écrire » : verrouillez</li><li>SECURITY DEFINER : search_path fixé et REVOKE … FROM PUBLIC</li><li>Contrainte déclarative d'abord, trigger ensuite</li><li>Les droits se donnent à des groupes, pas à des personnes</li></ul></div></div></div>
+<div id="pied"><span class="nom">Bases de données · CDA · Jour 2</span><div id="dots"></div><span id="compteur"></span></div>
+<div class="nav" id="prec" title="Précédent">&#8249;</div><div class="nav" id="suiv" title="Suivant">&#8250;</div>
+</div><script>
+const slides=[...document.querySelectorAll('.slide')];let i=0;const dots=document.getElementById('dots');
+slides.forEach((_,k)=>{const d=document.createElement('span');d.onclick=()=>go(k);dots.appendChild(d);});
+function go(n){i=Math.max(0,Math.min(slides.length-1,n));slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+ [...dots.children].forEach((d,k)=>d.classList.toggle('on',k===i));document.getElementById('compteur').textContent=(i+1)+' / '+slides.length;
+ document.getElementById('stage').classList.toggle('sombre',slides[i].classList.contains('section'));}
+function fit(){const s=Math.min(innerWidth/1280,innerHeight/720);document.getElementById('stage').style.transform='translate(-50%,-50%) scale('+s+')';}
+addEventListener('resize',fit);fit();go(0);
+addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(i+1);}
+ else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(i-1);} else if(e.key==='Home')go(0); else if(e.key==='End')go(slides.length-1);
+ else if(e.key==='Escape')window.parent.postMessage({type:'close-fullscreen'},'*');});
+addEventListener('message',e=>{if(e.data&&e.data.type==='navigate'){go(e.data.direction==='prev'?i-1:i+1);}});
+let x0=null;addEventListener('touchstart',e=>{x0=e.touches[0].clientX;});
+addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>50)go(dx<0?i+1:i-1);x0=null;});
+document.getElementById('prec').onclick=()=>go(i-1);document.getElementById('suiv').onclick=()=>go(i+1);
+</script></body></html>
